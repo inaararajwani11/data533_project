@@ -1,15 +1,3 @@
-"""
-focuscore.py
-
-Convert weekly metrics into one focus score (0–100) + grade.
-
-Responsibilities
-----------------
-- Compute numeric focus score
-- Assign a label (“OK”, “Strong”, “Elite focus”)
-- Provide week-level score helpers
-"""
-
 from __future__ import annotations
 
 from datetime import date
@@ -17,7 +5,6 @@ import sys
 from pathlib import Path
 from typing import List, Optional, Tuple
 
-# Allow running this module directly (python focuscore.py) by adding repo root to sys.path.
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -34,24 +21,14 @@ def compute_focus_score(
     distraction_rate: Optional[float],
     habit_completion_rate: float,
 ) -> float:
-    """
-    Combine:
-      - total_focus_minutes (capped 0–300)
-      - distraction_rate (lower is better)
-      - habit_completion_rate (0–1)
-
-    into a single score between 0 and 100.
-    """
-
-    # 1) Focus time: up to 40 points
+    # Focus time: up to 40 points
     capped_minutes = max(0, min(total_focus_minutes, 300))
     focus_component = (capped_minutes / 300.0) * 40.0
-
-    # 2) Habits: up to 40 points
+    # Habits: up to 40 points
     h_rate = max(0.0, min(habit_completion_rate, 1.0))
     habit_component = h_rate * 40.0
 
-    # 3) Distractions: up to 20 points
+    # Distractions: up to 20 points
     if distraction_rate is None:
         # If we have no data, assume neutral
         distraction_component = 10.0
@@ -83,13 +60,7 @@ def compute_weekly_focus_score(
     habits: List[Habit],
     week_start: date,
 ) -> float:
-    """
-    Convenience wrapper:
 
-    - calls compute_weekly_summary(...)
-    - computes distraction_rate_per_hour(...)
-    - calls compute_focus_score(...)
-    """
     summary = compute_weekly_summary(sessions, habits, week_start)
     d_rate = distraction_rate_per_hour(
         sessions=[s for s in sessions if week_start <= s.start_time.date() <= summary["week_end"]]
@@ -110,9 +81,7 @@ def compute_weekly_focus_with_grade(
     habits: List[Habit],
     week_start: date,
 ) -> Tuple[float, str]:
-    """
-    Return both (score, grade) for the week.
-    """
+    
     score = compute_weekly_focus_score(sessions, habits, week_start)
     grade = focus_grade(score)
     return score, grade

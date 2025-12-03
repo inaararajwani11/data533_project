@@ -1,15 +1,3 @@
-"""
-weekly_report.py
-
-Generate a weekly productivity summary using FocusSession + Habit data.
-
-Responsibilities
-----------------
-- Filter sessions for the selected week
-- Compute weekly metrics
-- Format report text / markdown
-"""
-
 from __future__ import annotations
 
 from datetime import date, timedelta
@@ -30,10 +18,7 @@ def filter_sessions_for_week(
     sessions: List[FocusSession],
     week_start: date,
 ) -> List[FocusSession]:
-    """
-    Return all sessions whose start_time falls within the
-    7‑day week starting at week_start (inclusive).
-    """
+    
     week_end_exclusive = week_start + timedelta(days=7)
 
     result: List[FocusSession] = []
@@ -48,11 +33,7 @@ def _habit_completion_rate_for_week(
     habits: List[Habit],
     week_start: date,
 ) -> float:
-    """
-    Very simple habit adherence metric:
-    fraction of habits that were completed at least once
-    during the given week.
-    """
+    
     if not habits:
         return 0.0
 
@@ -72,18 +53,7 @@ def compute_weekly_summary(
     habits: List[Habit],
     week_start: date,
 ) -> Dict[str, Any]:
-    """
-    Compute raw weekly metrics.
 
-    Returns a dict containing e.g.:
-      - week_start / week_end
-      - total_focus_minutes
-      - num_sessions
-      - average_session_length
-      - total_distractions
-      - habit_completion_rate
-      - top_habits (by streak)
-    """
     week_sessions = filter_sessions_for_week(sessions, week_start)
 
     total_focus_minutes = 0
@@ -126,10 +96,6 @@ def compute_weekly_summary(
 
 
 def format_weekly_report_text(summary: Dict[str, Any]) -> str:
-    """
-    Turn the summary dict into a multi‑line string suitable
-    for CLI output or markdown.
-    """
     week_start = summary.get("week_start")
     week_end = summary.get("week_end")
 
@@ -159,9 +125,6 @@ def export_weekly_report_markdown(
     summary: Dict[str, Any],
     filename: str,
 ) -> None:
-    """
-    Save the formatted weekly report as a .md file.
-    """
     text = format_weekly_report_text(summary)
     with open(filename, "w", encoding="utf-8") as f:
         # Simple markdown wrapper

@@ -1,16 +1,3 @@
-"""
-distraction.py
-
-Analyze distraction patterns from FocusSession objects.
-
-Responsibilities
-----------------
-- Count distractions
-- Compute distractions per hour
-- Breakdown by day
-- Breakdown by task
-"""
-
 from __future__ import annotations
 
 from datetime import date
@@ -18,7 +5,6 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional
 
-# Allow running this module directly (python distraction.py) by adding repo root to sys.path.
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -57,9 +43,7 @@ def distraction_rate_per_hour(
 def distractions_by_day(
     sessions: List[FocusSession],
 ) -> Dict[date, int]:
-    """
-    Return a dict mapping each date -> total distractions on that date.
-    """
+    
     result: Dict[date, int] = {}
 
     for s in sessions:
@@ -72,14 +56,7 @@ def distractions_by_day(
 def distraction_rate_by_task(
     sessions: List[FocusSession],
 ) -> Dict[str, float]:
-    """
-    Map task_label -> distractions per hour for that task.
-
-    Task label is derived in this priority:
-        1. FocusSession.task.name  (if present)
-        2. FocusSession.habit.name (prefixed with 'Habit: ')
-        3. FocusSession.label
-    """
+   
     total_minutes_by_label: Dict[str, int] = {}
     total_distractions_by_label: Dict[str, int] = {}
 

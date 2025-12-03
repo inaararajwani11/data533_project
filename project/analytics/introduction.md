@@ -1,0 +1,3 @@
+The Analytics sub‑package provides tools that transform raw productivity data into meaningful insights. It analyzes focus sessions, habits, and distraction patterns to help users understand their performance trends over time. By computing weekly summaries, identifying distraction behaviors, and generating a unified focus score, this sub‑package acts as the “reporting engine” of the project.
+
+Its three modules—weekly_report.py, distraction.py, and focuscore.py—work together to measure total focus time, habit consistency, productivity quality, and distraction rates. These metrics are then translated into readable reports and simple evaluations that support user reflection and improvement.
