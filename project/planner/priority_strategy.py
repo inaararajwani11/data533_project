@@ -1,17 +1,4 @@
-"""
-priority_strategy.py
 
-Defines how task priority scores are computed.
-
-This module provides:
-- PriorityStrategy (abstract base class)
-- SimplePriority
-- DeadlinePriority
-- EnergyAwarePriority
-
-These are used by Planner classes in base_planner.py to sort tasks
-before scheduling.
-"""
 
 from __future__ import annotations
 
@@ -31,37 +18,14 @@ class SupportsDifficulty(Protocol):
 
 
 class PriorityStrategy(ABC):
-    """
-    Abstract base class for all priority scoring strategies.
-
-    Subclasses must implement score(task), returning a numeric
-    priority score: higher means more important/urgent.
-    """
-
+   
     @abstractmethod
     def score(self, task: Task) -> float:
-        """
-        Compute a priority score for a given task.
-
-        Parameters
-        ----------
-        task : Task
-            The task to score.
-
-        Returns
-        -------
-        float
-            Higher values indicate higher priority.
-        """
         raise NotImplementedError
 
 
 class SimplePriority(PriorityStrategy):
-    """
-    Very simple priority: combines duration and (optional) priority attribute.
-
-    Intended as a baseline or fallback strategy.
-    """
+    
 
     def score(self, task: Task) -> float:
         duration = getattr(task, "duration", 0) or 0  # minutes
@@ -75,13 +39,7 @@ class SimplePriority(PriorityStrategy):
 
 
 class DeadlinePriority(PriorityStrategy):
-    """
-    Priority strategy that emphasizes deadlines and difficulty.
-
-    Heuristic:
-    - Urgency grows as the deadline approaches.
-    - More difficult and more important categories get extra weight.
-    """
+    
 
     def score(self, task: Task) -> float:
         today = date.today()
@@ -128,14 +86,7 @@ class DeadlinePriority(PriorityStrategy):
 
 
 class EnergyAwarePriority(PriorityStrategy):
-    """
-    Priority strategy that tries to match task difficulty with the
-    user's current energy level.
-
-    Idea:
-        - If difficulty ~ energy level, score is high.
-        - If difficulty >> energy or << energy, score drops.
-    """
+   
 
     def __init__(self, energy_level: int = 3) -> None:
         self.energy_level = max(1, min(5, energy_level))

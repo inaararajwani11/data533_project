@@ -9,11 +9,7 @@ from core.focus_session import (
     start_habit_session,
     start_custom_session
 )
-
-# ---------------------------------------------------------
 #   TASK TESTS
-# ---------------------------------------------------------
-
 def test_task_initialization():
     t = Task("Study", duration=60, category="study")
     assert t.name == "Study"
@@ -33,9 +29,7 @@ def test_task_manager_add_and_list():
     assert all_tasks[0].name == "Email"
     assert all_tasks[1].name == "Reading"
 
-# ---------------------------------------------------------
 #   HABIT TESTS
-# ---------------------------------------------------------
 
 def test_habit_creation_and_completion():
     h = Habit("Meditation")
@@ -59,9 +53,7 @@ def test_habit_manager_add_and_list():
     assert habits[0].name == "Exercise"
     assert habits[1].name == "Reading"
 
-# ---------------------------------------------------------
 #   FOCUS SESSION TESTS
-# ---------------------------------------------------------
 
 def test_focus_session_basic_flow():
     t = Task("Write report", 30)

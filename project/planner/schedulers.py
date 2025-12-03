@@ -1,17 +1,3 @@
-"""
-schedulers.py
-
-Defines how tasks are placed into time blocks.
-
-This module provides:
-- Scheduler (abstract base class)
-- SequentialScheduler
-- PomodoroScheduler (optional example)
-
-Schedulers are used by Planner subclasses to convert an ordered
-list of tasks into concrete start/end times (PlannedBlock objects).
-"""
-
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -25,15 +11,6 @@ from core.task import Task
 
 
 class Scheduler(ABC):
-    """
-    Abstract base class for all schedulers.
-
-    A scheduler receives:
-    - an ordered list of tasks
-    - a planning window [day_start, day_end]
-
-    and returns a list of PlannedBlock objects.
-    """
 
     @abstractmethod
     def schedule(
@@ -42,22 +19,12 @@ class Scheduler(ABC):
         day_start: datetime,
         day_end: datetime,
     ) -> List["PlannedBlock"]:
-        """
-        Build a schedule of time blocks for the given tasks.
-
-        Returns a list of PlannedBlock objects.
-        """
+       
         raise NotImplementedError
 
 
 class SequentialScheduler(Scheduler):
-    """
-    Simple scheduler that fills the day sequentially:
-
-    - Takes tasks in the given order.
-    - Assigns each task a block of time equal to its duration.
-    - Stops when there is no remaining time in the day.
-    """
+  
 
     def schedule(
         self,
@@ -89,13 +56,7 @@ class SequentialScheduler(Scheduler):
 
 
 class PomodoroScheduler(Scheduler):
-    """
-    Scheduler that uses a simple Pomodoro-like pattern:
 
-    - Work blocks of `work_minutes` length.
-    - Short break between blocks.
-    - Tasks are split across multiple work blocks if needed.
-    """
 
     def __init__(
         self,

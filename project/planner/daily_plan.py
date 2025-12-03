@@ -1,23 +1,15 @@
-"""
-daily_plan.py
-
-User-facing interface for generating a daily schedule
-using the planners defined in base_planner.py.
-
-This module provides:
-- generate_daily_plan(): main function for creating a study plan
-- optional CLI mode for quick manual runs
-
-It ties together:
-    * a Planner (StudyPlanner, EnergyPlanner, BalancedPlanner)
-    * Task list provided by the user
-    * start/end time for the planning window
-"""
 
 from __future__ import annotations
 
 from datetime import datetime
+import sys
+from pathlib import Path
 from typing import List, Sequence
+
+# Allow running this module directly by adding repo root to sys.path.
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from core.task import Task
 from planner.base_planner import (
@@ -29,29 +21,11 @@ from planner.base_planner import (
 from planner.base_planner import PlannedBlock
 
 
-# -------------------------------------------------------------------
-# Planner selection helper
-# -------------------------------------------------------------------
-
 def get_planner(
     mode: str = "study",
     energy_level: int = 3,
 ) -> Planner:
-    """
-    Return a Planner instance based on the selected mode.
 
-    Parameters
-    ----------
-    mode : str
-        One of: "study", "energy", "balanced".
-    energy_level : int
-        Used only for EnergyPlanner (1–5).
-
-    Returns
-    -------
-    Planner
-        A configured Planner instance.
-    """
     mode = mode.lower()
 
     if mode == "study":
@@ -69,10 +43,6 @@ def get_planner(
         )
 
 
-# -------------------------------------------------------------------
-# Main daily plan generator
-# -------------------------------------------------------------------
-
 def generate_daily_plan(
     tasks: Sequence[Task],
     mode: str = "study",
@@ -80,29 +50,8 @@ def generate_daily_plan(
     start: str = "09:00",
     end: str = "18:00",
 ) -> List[PlannedBlock]:
-    """
-    Generate a daily schedule using the specified planner mode.
 
-    Parameters
-    ----------
-    tasks : sequence of Task
-        List of Task objects needing to be scheduled.
-    mode : str
-        Planner type: "study", "energy", or "balanced".
-    energy_level : int
-        Only applies when mode="energy".
-    start : str
-        Start time as HH:MM (24-hour format).
-    end : str
-        End time as HH:MM (24-hour format).
 
-    Returns
-    -------
-    list of PlannedBlock
-        Scheduled time blocks for the day.
-    """
-
-    # Convert HH:MM to datetime objects (using today's date)
     today = datetime.today().date()
     start_dt = datetime.strptime(start, "%H:%M").replace(year=today.year, month=today.month, day=today.day)
     end_dt = datetime.strptime(end, "%H:%M").replace(year=today.year, month=today.month, day=today.day)
@@ -112,14 +61,8 @@ def generate_daily_plan(
     return planner.generate(tasks=tasks, day_start=start_dt, day_end=end_dt)
 
 
-# -------------------------------------------------------------------
-# Optional CLI usage (for debugging / local testing)
-# -------------------------------------------------------------------
 
 def _demo():
-    """
-    Simple demo for running the planner manually.
-    """
 
     # Example placeholder tasks
     tasks = [

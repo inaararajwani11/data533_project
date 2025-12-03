@@ -1,20 +1,4 @@
-cd"""
-base_planner.py
 
-High-level planning logic for FocusForge.
-
-This module defines:
-- A Planner base class that combines:
-    * a priority scoring strategy
-    * a scheduling algorithm
-- Concrete planner subclasses:
-    * StudyPlanner
-    * EnergyPlanner
-    * BalancedPlanner
-
-Each planner takes a list of Task objects and returns a list of
-PlannedBlock objects representing a daily schedule.
-"""
 
 from __future__ import annotations
 
@@ -35,9 +19,7 @@ from planner.schedulers import Scheduler, SequentialScheduler
 
 @dataclass
 class PlannedBlock:
-    """
-    Represents a scheduled block of time for a given task.
-    """
+    
     task: Task
     start: datetime
     end: datetime
@@ -48,32 +30,17 @@ class PlannedBlock:
         return f"{start_str}–{end_str}  {self.task.name}"
 
 
-# -------------------------------------------------------------------
-# Planner base class
-# -------------------------------------------------------------------
 
 
 class Planner(ABC):
-    """
-    Abstract base class for all planners.
 
-    A Planner coordinates:
-    - a PriorityStrategy (how important each task is)
-    - a Scheduler (how tasks are arranged in time)
-
-    Subclasses implement the generate() method to produce
-    a daily plan from a list of tasks.
-    """
 
     def __init__(self, priority_strategy: PriorityStrategy, scheduler: Scheduler) -> None:
         self.priority_strategy = priority_strategy
         self.scheduler = scheduler
 
     def _sort_tasks(self, tasks: Sequence[Task]) -> List[Task]:
-        """
-        Sort tasks by descending priority score using the current
-        PriorityStrategy.
-        """
+       
         return sorted(
             tasks,
             key=self.priority_strategy.score,
@@ -87,38 +54,11 @@ class Planner(ABC):
         day_start: datetime,
         day_end: datetime,
     ) -> List[PlannedBlock]:
-        """
-        Generate a daily schedule from the given tasks.
-
-        Parameters
-        ----------
-        tasks : sequence of Task
-            All tasks that the user wants to consider for today.
-        day_start : datetime
-            Start time of the planning window.
-        day_end : datetime
-            End time of the planning window.
-
-        Returns
-        -------
-        list of PlannedBlock
-            The final schedule (tasks with start/end times).
-        """
         raise NotImplementedError
 
 
-# -------------------------------------------------------------------
-# Concrete planners
-# -------------------------------------------------------------------
-
 
 class StudyPlanner(Planner):
-    """
-    Planner optimized for coursework and deadlines.
-
-    Uses a deadline-aware priority strategy + any Scheduler to
-    produce an ordered daily study plan.
-    """
 
     def __init__(self, scheduler: Scheduler | None = None) -> None:
         priority = DeadlinePriority()
@@ -139,26 +79,14 @@ class StudyPlanner(Planner):
 
 
 class EnergyPlanner(Planner):
-    """
-    Planner that takes the user's energy level into account.
 
-    Higher-energy periods can be matched with more difficult tasks
-    via the EnergyAwarePriority strategy.
-    """
 
     def __init__(
         self,
         energy_level: int,
         scheduler: Scheduler | None = None,
     ) -> None:
-        """
-        Parameters
-        ----------
-        energy_level : int
-            Rough estimate of the user's energy (e.g. 1–5).
-        scheduler : Scheduler, optional
-            If None, defaults to SequentialScheduler.
-        """
+       
         priority = EnergyAwarePriority(energy_level=energy_level)
         if scheduler is None:
             scheduler = SequentialScheduler()
@@ -175,14 +103,7 @@ class EnergyPlanner(Planner):
 
 
 class BalancedPlanner(Planner):
-    """
-    Planner that tries to balance deep work, admin tasks, and recovery.
-
-    Simple heuristic:
-    - Recovery / habit-like tasks are inserted early in the day or
-      spaced between heavier tasks.
-    - Remaining tasks are ordered by the chosen PriorityStrategy.
-    """
+ 
 
     def __init__(
         self,
