@@ -27,7 +27,7 @@ class PlannedBlock:
     def __str__(self) -> str:
         start_str = self.start.strftime("%H:%M")
         end_str = self.end.strftime("%H:%M")
-        return f"{start_str}–{end_str}  {self.task.name}"
+        return f"{start_str}-{end_str}  {self.task.name}"
 
 
 
@@ -38,6 +38,18 @@ class Planner(ABC):
     def __init__(self, priority_strategy: PriorityStrategy, scheduler: Scheduler) -> None:
         self.priority_strategy = priority_strategy
         self.scheduler = scheduler
+
+    def _filter_active_tasks(self, tasks: Sequence[Task]) -> List[Task]:
+        """Drop completed or zero-duration tasks before scheduling."""
+        active: List[Task] = []
+        for task in tasks:
+            if getattr(task, "completed", False):
+                continue
+            duration = getattr(task, "duration", 0) or 0
+            if duration <= 0:
+                continue
+            active.append(task)
+        return active
 
     def _sort_tasks(self, tasks: Sequence[Task]) -> List[Task]:
        
@@ -72,8 +84,11 @@ class StudyPlanner(Planner):
         day_start: datetime,
         day_end: datetime,
     ) -> List[PlannedBlock]:
+        active_tasks = self._filter_active_tasks(tasks)
+        if not active_tasks:
+            return []
         # Sort by deadline/difficulty/etc. (handled inside DeadlinePriority)
-        sorted_tasks = self._sort_tasks(tasks)
+        sorted_tasks = self._sort_tasks(active_tasks)
         # Delegate to the chosen scheduler to place tasks into time blocks
         return self.scheduler.schedule(sorted_tasks, day_start, day_end)
 
@@ -98,7 +113,10 @@ class EnergyPlanner(Planner):
         day_start: datetime,
         day_end: datetime,
     ) -> List[PlannedBlock]:
-        sorted_tasks = self._sort_tasks(tasks)
+        active_tasks = self._filter_active_tasks(tasks)
+        if not active_tasks:
+            return []
+        sorted_tasks = self._sort_tasks(active_tasks)
         return self.scheduler.schedule(sorted_tasks, day_start, day_end)
 
 
@@ -109,12 +127,18 @@ class BalancedPlanner(Planner):
         self,
         priority_strategy: PriorityStrategy | None = None,
         scheduler: Scheduler | None = None,
+        recovery_interval: int = 2,
     ) -> None:
         # Default: use DeadlinePriority + SequentialScheduler
         if priority_strategy is None:
             priority_strategy = DeadlinePriority()
         if scheduler is None:
             scheduler = SequentialScheduler()
+        try:
+            interval = int(recovery_interval)
+        except (TypeError, ValueError):
+            interval = 2
+        self.recovery_interval = max(1, interval)
         super().__init__(priority_strategy=priority_strategy, scheduler=scheduler)
 
     def generate(
@@ -123,13 +147,16 @@ class BalancedPlanner(Planner):
         day_start: datetime,
         day_end: datetime,
     ) -> List[PlannedBlock]:
+        active_tasks = self._filter_active_tasks(tasks)
+        if not active_tasks:
+            return []
         # Simple balancing rule:
         #   - Treat "recovery" category tasks as micro-breaks.
         #   - Other tasks get sorted by normal priority.
         recovery_tasks: List[Task] = []
         regular_tasks: List[Task] = []
 
-        for t in tasks:
+        for t in active_tasks:
             if getattr(t, "category", None) == "recovery":
                 recovery_tasks.append(t)
             else:
@@ -139,7 +166,7 @@ class BalancedPlanner(Planner):
         regular_sorted = self._sort_tasks(regular_tasks)
 
         # Heuristic: interleave one recovery task after every N regular tasks
-        N = 2
+        N = self.recovery_interval
         combined: List[Task] = []
         idx_recovery = 0
 
