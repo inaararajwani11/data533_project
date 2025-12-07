@@ -13,17 +13,12 @@ from core.focus_session import FocusSession
 
 
 def total_distractions(sessions: List[FocusSession]) -> int:
-    """Return total number of distractions across all sessions."""
     return sum(s.distractions for s in sessions)
 
 
 def distraction_rate_per_hour(
     sessions: List[FocusSession],
 ) -> Optional[float]:
-    """
-    Compute global distractions per hour.
-    Returns None if total session time is zero.
-    """
     total_minutes = 0
     total = 0
 
