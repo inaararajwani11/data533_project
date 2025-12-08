@@ -43,9 +43,6 @@ def compute_focus_score(
 
 
 def focus_grade(score: float) -> str:
-    """
-    Map numeric score to a simple grade/label.
-    """
     if score < 40:
         return "Needs work"
     if score < 60:
