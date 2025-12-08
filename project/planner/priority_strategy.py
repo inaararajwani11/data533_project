@@ -48,11 +48,15 @@ class DeadlinePriority(PriorityStrategy):
         deadline = getattr(task, "deadline", None)
         if deadline is not None:
             days_left = (deadline - today).days
-            urgency = 1.0 / max(days_left, 1)  # 1.0 if due today, 0.5 if tomorrow, etc.
+            if days_left < 0:
+                # Overdue work should jump to the front of the queue.
+                urgency = 2.0 + abs(days_left)
+            else:
+                urgency = 1.0 / max(days_left, 1)  # 1.0 if due today, 0.5 if tomorrow, etc.
         else:
             urgency = 0.0
 
-        # 2) Difficulty (default 3 on a 1–5 scale)
+        # 2) Difficulty (default 3 on a 1-5 scale)
         difficulty = getattr(task, "difficulty", 3) or 3
 
         # 3) Importance from category

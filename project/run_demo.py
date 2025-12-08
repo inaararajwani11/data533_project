@@ -277,7 +277,16 @@ def build_sample_sessions(tasks: list[Task], habit: Habit):
 
 def show_plan(tasks: list[Task]) -> None:
     print("\n--- Daily plan (study mode) ---")
-    blocks = generate_daily_plan(tasks, mode="study", start="09:00", end="12:00")
+    use_pomodoro = any(getattr(t, "pomodoro", False) for t in tasks)
+    if use_pomodoro:
+        print("Using Pomodoro scheduling for tasks marked Pomodoro.")
+    blocks = generate_daily_plan(
+        tasks,
+        mode="study",
+        start="09:00",
+        end="12:00",
+        prefer_pomodoro=True,
+    )
     for block in blocks:
         print(" ", block)
 
