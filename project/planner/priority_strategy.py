@@ -52,7 +52,8 @@ class DeadlinePriority(PriorityStrategy):
                 # Overdue work should jump to the front of the queue.
                 urgency = 2.0 + abs(days_left)
             else:
-                urgency = 1.0 / max(days_left, 1)  # 1.0 if due today, 0.5 if tomorrow, etc.
+                # Nearer deadlines score higher; tomorrow should be lower than today.
+                urgency = 1.0 / (days_left + 1)
         else:
             urgency = 0.0
 

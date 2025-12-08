@@ -22,6 +22,31 @@ from planner.base_planner import PlannedBlock
 from planner.schedulers import Scheduler, PomodoroScheduler
 
 
+def _normalize_energy_level(value) -> int:
+    """
+    Coerce arbitrary input into the 1-5 range used by EnergyPlanner.
+    Falls back to 3 if the value cannot be parsed.
+    """
+    try:
+        level = int(value)
+    except (TypeError, ValueError):
+        return 3
+    return max(1, min(5, level))
+
+
+def _parse_time(time_str: str, label: str) -> datetime:
+    """
+    Parse an HH:MM string into a datetime on today's date.
+    Raises ValueError with a user-friendly message on bad input.
+    """
+    today = datetime.today().date()
+    try:
+        parsed = datetime.strptime(time_str, "%H:%M")
+    except (TypeError, ValueError):
+        raise ValueError(f"{label} must be in HH:MM (24-hour) format.")
+    return parsed.replace(year=today.year, month=today.month, day=today.day)
+
+
 def get_planner(
     mode: str = "study",
     energy_level: int = 3,
@@ -29,6 +54,7 @@ def get_planner(
 ) -> Planner:
 
     mode = mode.lower()
+    energy_level = _normalize_energy_level(energy_level)
 
     if mode == "study":
         return StudyPlanner(scheduler=scheduler)
@@ -53,11 +79,13 @@ def generate_daily_plan(
     end: str = "18:00",
     prefer_pomodoro: bool = True,
 ) -> List[PlannedBlock]:
-
-
-    today = datetime.today().date()
-    start_dt = datetime.strptime(start, "%H:%M").replace(year=today.year, month=today.month, day=today.day)
-    end_dt = datetime.strptime(end, "%H:%M").replace(year=today.year, month=today.month, day=today.day)
+    """
+    Build a daily plan by selecting a planner and scheduler, validating inputs,
+    and delegating to the planner's generate method.
+    """
+    start_dt = _parse_time(start, "start time")
+    end_dt = _parse_time(end, "end time")
+    energy_level = _normalize_energy_level(energy_level)
 
     if end_dt <= start_dt:
         raise ValueError("End time must be after start time.")

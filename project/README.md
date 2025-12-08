@@ -55,6 +55,21 @@ An educational productivity toolkit showing tasks, habits, planning, focus sessi
 | `SequentialScheduler.schedule(tasks, day_start, day_end)` | ordered `tasks`, window start/end | `List[PlannedBlock]` | Fills the day in order; stops when out of time. |
 | `PomodoroScheduler.schedule(tasks, day_start, day_end)` | ordered `tasks`, window start/end | `List[PlannedBlock]` | Splits tasks into Pomodoro blocks with short breaks. |
 
+### Planner quick start
+```python
+from planner.daily_plan import generate_daily_plan
+from core.task import Task
+
+tasks = [
+    Task("Study", 40, category="study"),
+    Task("Break", 10, category="recovery"),
+]
+plan = generate_daily_plan(tasks, mode="balanced", start="09:00", end="10:30")
+for block in plan:
+    print(block)  # => HH:MM-HH:MM  Task Name
+```
+`generate_daily_plan` returns a list of `PlannedBlock` objects you can print or inspect.
+
 ### Package expectations mapping
 - 3 sub-packages (`core`, `planner`, `analytics`), each with multiple modules and methods.
 - Inheritance: `Planner` (ABC) with concrete subclasses; `Scheduler` ABC with concrete schedulers.
