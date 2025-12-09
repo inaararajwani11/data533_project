@@ -8,7 +8,7 @@ import unittest
 from .test_planner import PlannerTests
 from .test_planner_helpers import PlannerHelperTests
 #anita's test file
-#from .test_focuscore import TestFocusCore
+from .test_focuscore import TestFocusCore
 # Thomas's test file
 
 
@@ -17,7 +17,7 @@ def suite() -> unittest.TestSuite:
     suite = unittest.TestSuite()
     suite.addTests(loader.loadTestsFromTestCase(PlannerTests))
     suite.addTests(loader.loadTestsFromTestCase(PlannerHelperTests))
-    #suite.addTests(loader.loadTestsFromTestCase(TestFocusCore))
+    suite.addTests(loader.loadTestsFromTestCase(TestFocusCore))
     return suite
 
 
