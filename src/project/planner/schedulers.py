@@ -38,7 +38,12 @@ class SequentialScheduler(Scheduler):
         current_start = day_start
 
         for task in tasks:
-            duration_minutes = getattr(task, "duration", 0) or 0
+            try:
+                duration_minutes = int(getattr(task, "duration", 0) or 0)
+            except (TypeError, ValueError):
+                continue  # skip tasks with non-numeric durations
+            except Exception:
+                continue
             if duration_minutes <= 0:
                 continue  # skip zero-length tasks
 
@@ -81,7 +86,12 @@ class PomodoroScheduler(Scheduler):
         break_delta = timedelta(minutes=self.break_minutes)
 
         for task in tasks:
-            remaining_minutes = getattr(task, "duration", 0) or 0
+            try:
+                remaining_minutes = int(getattr(task, "duration", 0) or 0)
+            except (TypeError, ValueError):
+                continue
+            except Exception:
+                continue
             if remaining_minutes <= 0:
                 continue
 

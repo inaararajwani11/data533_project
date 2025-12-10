@@ -10,6 +10,7 @@ from abc import ABC, abstractmethod
 from ..core.task import Task
 from .priority_strategy import PriorityStrategy, DeadlinePriority, EnergyAwarePriority
 from .schedulers import Scheduler, SequentialScheduler
+from .exceptions import PlannerConfigurationError
 
 
 # -------------------------------------------------------------------
@@ -84,11 +85,17 @@ class StudyPlanner(Planner):
         day_start: datetime,
         day_end: datetime,
     ) -> List[PlannedBlock]:
-        active_tasks = self._filter_active_tasks(tasks)
+        try:
+            active_tasks = self._filter_active_tasks(tasks)
+        except Exception as exc:
+            raise PlannerConfigurationError("Unable to filter tasks for StudyPlanner") from exc
         if not active_tasks:
             return []
         # Sort by deadline/difficulty/etc. (handled inside DeadlinePriority)
-        sorted_tasks = self._sort_tasks(active_tasks)
+        try:
+            sorted_tasks = self._sort_tasks(active_tasks)
+        except Exception as exc:
+            raise PlannerConfigurationError("Unable to sort tasks for StudyPlanner") from exc
         # Delegate to the chosen scheduler to place tasks into time blocks
         return self.scheduler.schedule(sorted_tasks, day_start, day_end)
 
@@ -113,10 +120,16 @@ class EnergyPlanner(Planner):
         day_start: datetime,
         day_end: datetime,
     ) -> List[PlannedBlock]:
-        active_tasks = self._filter_active_tasks(tasks)
+        try:
+            active_tasks = self._filter_active_tasks(tasks)
+        except Exception as exc:
+            raise PlannerConfigurationError("Unable to filter tasks for EnergyPlanner") from exc
         if not active_tasks:
             return []
-        sorted_tasks = self._sort_tasks(active_tasks)
+        try:
+            sorted_tasks = self._sort_tasks(active_tasks)
+        except Exception as exc:
+            raise PlannerConfigurationError("Unable to sort tasks for EnergyPlanner") from exc
         return self.scheduler.schedule(sorted_tasks, day_start, day_end)
 
 
@@ -138,6 +151,8 @@ class BalancedPlanner(Planner):
             interval = int(recovery_interval)
         except (TypeError, ValueError):
             interval = 2
+        except Exception:
+            interval = 2
         self.recovery_interval = max(1, interval)
         super().__init__(priority_strategy=priority_strategy, scheduler=scheduler)
 
@@ -147,7 +162,10 @@ class BalancedPlanner(Planner):
         day_start: datetime,
         day_end: datetime,
     ) -> List[PlannedBlock]:
-        active_tasks = self._filter_active_tasks(tasks)
+        try:
+            active_tasks = self._filter_active_tasks(tasks)
+        except Exception as exc:
+            raise PlannerConfigurationError("Unable to filter tasks for BalancedPlanner") from exc
         if not active_tasks:
             return []
         # Simple balancing rule:

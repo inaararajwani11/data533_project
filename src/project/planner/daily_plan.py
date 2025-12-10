@@ -32,6 +32,8 @@ def _normalize_energy_level(value) -> int:
         level = int(value)
     except (TypeError, ValueError):
         return 3
+    except Exception:
+        return 3
     return max(1, min(5, level))
 
 
@@ -47,6 +49,8 @@ def _parse_time(time_str: str, label: str) -> datetime:
         raise PlannerConfigurationError(
             f"{label} must be in HH:MM (24-hour) format."
         )
+    except Exception as exc:
+        raise PlannerConfigurationError(f"Unexpected error parsing {label}") from exc
     return parsed.replace(year=today.year, month=today.month, day=today.day)
 
 
