@@ -70,6 +70,22 @@ for block in plan:
 ```
 `generate_daily_plan` returns a list of `PlannedBlock` objects you can print or inspect.
 
+### Planner tests and exceptions
+- Planner uses custom exceptions for configuration and scheduling errors (`PlannerConfigurationError`, `SchedulingWindowError`) and is covered by `tests/test_planner.py` and `tests/test_planner_helpers.py`.
+- Run planner tests only:  
+  ```bash
+  python -m unittest -v tests.test_planner tests.test_planner_helpers
+  ```
+
+### CI and coverage (unittest)
+- CI runs on GitHub Actions with `coverage run -m unittest discover -s tests -t .`.
+- Local run (PowerShell):  
+  ```bash
+  $env:PYTHONPATH="src\project"
+  python -m coverage run -m unittest discover -s tests -t .
+  python -m coverage report
+  ```
+
 ### Package expectations mapping
 - 3 sub-packages (`core`, `planner`, `analytics`), each with multiple modules and methods.
 - Inheritance: `Planner` (ABC) with concrete subclasses; `Scheduler` ABC with concrete schedulers.

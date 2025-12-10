@@ -1,9 +1,14 @@
 import unittest
 from datetime import datetime, timedelta
 
-from core.task import Task
-from planner.base_planner import BalancedPlanner, PlannedBlock
-from planner.daily_plan import generate_daily_plan, _normalize_energy_level, _parse_time
+from src.project.core.task import Task
+from src.project.planner.base_planner import BalancedPlanner, PlannedBlock
+from src.project.planner.daily_plan import (
+    generate_daily_plan,
+    _normalize_energy_level,
+    _parse_time,
+)
+from src.project.planner.exceptions import PlannerConfigurationError
 
 
 class PlannerHelperTests(unittest.TestCase):
@@ -14,12 +19,14 @@ class PlannerHelperTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        print("PlannerHelperTests: setUpClass")
         cls.default_start = "09:00"
         cls.default_end = "12:00"
         cls.today = datetime.now().date()
 
     @classmethod
     def tearDownClass(cls):
+        print("PlannerHelperTests: tearDownClass")
         cls.default_start = None
         cls.default_end = None
         cls.today = None
@@ -42,7 +49,7 @@ class PlannerHelperTests(unittest.TestCase):
         self.assertEqual(_normalize_energy_level("8"), 5)
         self.assertEqual(_normalize_energy_level("0"), 1)
         self.assertEqual(_normalize_energy_level(None), 3)
-        with self.assertRaisesRegex(ValueError, "HH:MM"):
+        with self.assertRaisesRegex(PlannerConfigurationError, "HH:MM"):
             _parse_time("7-15", "start time")
 
     def test_generate_plan_pomodoro_toggle_and_filters(self):
@@ -94,6 +101,32 @@ class PlannerHelperTests(unittest.TestCase):
         self.assertIn(self.study.name, str(block))
         self.assertTrue(str(block).startswith("09:00"))
         self.assertTrue(str(block).endswith(self.study.name))
+
+    def test_pomodoro_scheduler_break_cutoff(self):
+        tasks = [Task("Pomodoro Task", 50, category="study", pomodoro=True)]
+        blocks = generate_daily_plan(tasks, start="09:00", end="09:26", prefer_pomodoro=True)
+        self.assertEqual(len(blocks), 1)
+        self.assertEqual((blocks[0].end - blocks[0].start), timedelta(minutes=25))
+        self.assertEqual(blocks[0].task.name, "Pomodoro Task")
+
+    def test_balanced_planner_appends_remaining_recovery(self):
+        planner = BalancedPlanner(recovery_interval=2)
+        tasks = [
+            Task("Study A", 10, category="study"),
+            Task("Study B", 10, category="study"),
+            Task("Break 1", 5, category="recovery"),
+            Task("Break 2", 5, category="recovery"),
+        ]
+        blocks = planner.generate(
+            tasks, day_start=datetime(2024, 1, 1, 9, 0), day_end=datetime(2024, 1, 1, 9, 40)
+        )
+        self.assertGreaterEqual(len(blocks), 4)
+        self.assertEqual(blocks[0].task.name, "Study A")
+        self.assertEqual(blocks[2].task.category, "recovery")
+        self.assertEqual(blocks[-1].task.name, "Break 2")
+
+    def test_normalize_energy_level_clamps_negative(self):
+        self.assertEqual(_normalize_energy_level(-5), 1)
 
 
 if __name__ == "__main__":
