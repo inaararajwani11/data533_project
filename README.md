@@ -79,12 +79,14 @@ for block in plan:
 
 ### CI and coverage (unittest)
 - CI runs on GitHub Actions with `coverage run -m unittest discover -s tests -t .`.
-- Local run (PowerShell):  
-  ```bash
-  $env:PYTHONPATH="src\project"
-  python -m coverage run -m unittest discover -s tests -t .
-  python -m coverage report
-  ```
+- Local commands (PowerShell):
+
+| Command | Purpose |
+| --- | --- |
+| `$env:PYTHONPATH="src\project"` | Ensure imports work with `core/...` |
+| `python -m coverage run -m unittest discover -s tests -t .` | Run full suite with coverage |
+| `python -m coverage report` | Show coverage summary |
+| `python -m unittest -v tests.test_planner tests.test_planner_helpers` | Planner-only tests (verbose) |
 
 ### Package expectations mapping
 - 3 sub-packages (`core`, `planner`, `analytics`), each with multiple modules and methods.
