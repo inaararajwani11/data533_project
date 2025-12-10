@@ -1,10 +1,19 @@
 import unittest
 from datetime import datetime, timedelta
 
-from core.task import Task
-from planner.base_planner import BalancedPlanner, EnergyPlanner, PlannedBlock, StudyPlanner
-from planner.daily_plan import generate_daily_plan, get_planner
-from planner.schedulers import SequentialScheduler
+from src.project.core.task import Task
+from src.project.planner.base_planner import (
+    BalancedPlanner,
+    EnergyPlanner,
+    PlannedBlock,
+    StudyPlanner,
+)
+from src.project.planner.daily_plan import generate_daily_plan, get_planner
+from src.project.planner.schedulers import SequentialScheduler
+from src.project.planner.exceptions import (
+    PlannerConfigurationError,
+    SchedulingWindowError,
+)
 
 
 class PlannerTests(unittest.TestCase):
@@ -15,12 +24,14 @@ class PlannerTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        print("PlannerTests: setUpClass")
         cls.default_start = "09:00"
         cls.default_end = "11:00"
         cls.today = datetime.now().date()
 
     @classmethod
     def tearDownClass(cls):
+        print("PlannerTests: tearDownClass")
         cls.default_start = None
         cls.default_end = None
         cls.today = None
@@ -38,7 +49,7 @@ class PlannerTests(unittest.TestCase):
         self.easy_task = None
 
     def test_get_planner_variants_and_invalid_mode(self):
-        with self.assertRaises(ValueError) as ctx:
+        with self.assertRaises(PlannerConfigurationError) as ctx:
             get_planner("unknown")
         self.assertIn("Unknown planner mode", str(ctx.exception))
 
@@ -52,11 +63,11 @@ class PlannerTests(unittest.TestCase):
 
     def test_generate_daily_plan_validates_inputs(self):
         tasks = [self.study_task]
-        with self.assertRaises(ValueError) as ctx:
+        with self.assertRaises(SchedulingWindowError) as ctx:
             generate_daily_plan(tasks, start="10:00", end="09:00")
         self.assertIn("End time must be after start time", str(ctx.exception))
 
-        with self.assertRaisesRegex(ValueError, "HH:MM"):
+        with self.assertRaisesRegex(PlannerConfigurationError, "HH:MM"):
             generate_daily_plan(tasks, start="nine", end="12:00")
 
         valid_blocks = generate_daily_plan(tasks, start=self.default_start, end="09:45")

@@ -34,7 +34,16 @@ def suite() -> unittest.TestSuite:
     return suite
 
 
-if __name__ == "__main__":
+class SuiteSmokeTests(unittest.TestCase):
+    """Minimal coverage to ensure suite assembly works."""
+
+    def test_suite_collects_tests(self) -> None:
+        assembled = suite()
+        self.assertIsInstance(assembled, unittest.TestSuite)
+        self.assertGreater(assembled.countTestCases(), 0)
+
+
+if __name__ == "__main__":  # pragma: no cover
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite())
     if not result.wasSuccessful():

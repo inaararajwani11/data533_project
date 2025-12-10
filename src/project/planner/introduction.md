@@ -43,6 +43,7 @@ Turn `Task` objects into time-blocked daily schedules using priority scoring and
 - User-facing helpers `get_planner` and `generate_daily_plan`
 - Input validation for planner mode, energy level (clamped 1-5), and HH:MM start/end
 - Optional Pomodoro preference that switches scheduler automatically
+- Raises planner-specific exceptions (`PlannerConfigurationError`, `SchedulingWindowError`) for invalid config/time windows
 
 ---
 
@@ -55,6 +56,7 @@ This subpackage provides:
 - Scheduling engines: sequential and Pomodoro
 - Safe input handling (time parsing, energy-level clamping) before scheduling
 - Simple entrypoint (`generate_daily_plan`) for CLI or other callers
+- Planner-specific exceptions for clearer error handling
 
 ---
 
@@ -66,6 +68,7 @@ This subpackage:
 - Operates on `core.Task` objects and returns `PlannedBlock` instances
 - Keeps planners/schedulers swappable to stay modular and extensible
 - Can be extended with new priority strategies or scheduling algorithms without touching callers
+- Fully covered by planner unit tests, including edge cases for pomodoro cutoffs, recovery appends, and validation
 
 ---
 
@@ -77,3 +80,16 @@ The `planner` subpackage is responsible for:
 - Clear module boundaries (core planners, priorities, schedulers, user helpers)
 - Inheritance-based extensibility with well-defined inputs/outputs
 - Reusable, testable scheduling components ready for CLI or API use
+
+## Tests and coverage
+- Primary planner tests: `tests/test_planner.py` and `tests/test_planner_helpers.py`
+- Run planner tests only:
+  ```bash
+  python -m unittest -v tests.test_planner tests.test_planner_helpers
+  ```
+- Full suite with coverage (PowerShell):
+  ```bash
+  $env:PYTHONPATH="src\project"
+  python -m coverage run -m unittest discover -s tests -t .
+  python -m coverage report
+  ```

@@ -11,15 +11,16 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from core.task import Task
-from planner.base_planner import (
+from ..core.task import Task
+from .base_planner import (
     Planner,
     StudyPlanner,
     EnergyPlanner,
     BalancedPlanner,
+    PlannedBlock,
 )
-from planner.base_planner import PlannedBlock
-from planner.schedulers import Scheduler, PomodoroScheduler
+from .schedulers import Scheduler, PomodoroScheduler
+from .exceptions import PlannerConfigurationError, SchedulingWindowError
 
 
 def _normalize_energy_level(value) -> int:
@@ -43,7 +44,9 @@ def _parse_time(time_str: str, label: str) -> datetime:
     try:
         parsed = datetime.strptime(time_str, "%H:%M")
     except (TypeError, ValueError):
-        raise ValueError(f"{label} must be in HH:MM (24-hour) format.")
+        raise PlannerConfigurationError(
+            f"{label} must be in HH:MM (24-hour) format."
+        )
     return parsed.replace(year=today.year, month=today.month, day=today.day)
 
 
@@ -66,7 +69,7 @@ def get_planner(
         return BalancedPlanner(scheduler=scheduler)
 
     else:
-        raise ValueError(
+        raise PlannerConfigurationError(
             f"Unknown planner mode '{mode}'. Use 'study', 'energy', or 'balanced'."
         )
 
@@ -88,7 +91,7 @@ def generate_daily_plan(
     energy_level = _normalize_energy_level(energy_level)
 
     if end_dt <= start_dt:
-        raise ValueError("End time must be after start time.")
+        raise SchedulingWindowError("End time must be after start time.")
 
     active_tasks = [
         t

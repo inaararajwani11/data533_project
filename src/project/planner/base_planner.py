@@ -7,9 +7,9 @@ from datetime import datetime
 from typing import List, Sequence
 from abc import ABC, abstractmethod
 
-from core.task import Task
-from planner.priority_strategy import PriorityStrategy, DeadlinePriority, EnergyAwarePriority
-from planner.schedulers import Scheduler, SequentialScheduler
+from ..core.task import Task
+from .priority_strategy import PriorityStrategy, DeadlinePriority, EnergyAwarePriority
+from .schedulers import Scheduler, SequentialScheduler
 
 
 # -------------------------------------------------------------------
