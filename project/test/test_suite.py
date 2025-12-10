@@ -1,5 +1,5 @@
 """
-Custom test suite to explicitly collect planner tests.
+Custom test suite to explicitly collect planner and core module tests.
 Run with: python -m unittest test.test_suite
 """
 
@@ -7,17 +7,30 @@ import unittest
 
 from .test_planner import PlannerTests
 from .test_planner_helpers import PlannerHelperTests
-#anita's test file
 from .test_focuscore import TestFocusCore
-# Thomas's test file
+from .test_core import (
+    TestFocusSessionModule,
+    TestHabitModule,
+    TestTaskAliasModule,
+    TestTasksModule,
+)
 
 
 def suite() -> unittest.TestSuite:
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
-    suite.addTests(loader.loadTestsFromTestCase(PlannerTests))
-    suite.addTests(loader.loadTestsFromTestCase(PlannerHelperTests))
-    suite.addTests(loader.loadTestsFromTestCase(TestFocusCore))
+
+    for case in (
+        PlannerTests,
+        PlannerHelperTests,
+        TestFocusCore,
+        TestTasksModule,
+        TestHabitModule,
+        TestFocusSessionModule,
+        TestTaskAliasModule,
+    ):
+        suite.addTests(loader.loadTestsFromTestCase(case))
+
     return suite
 
 
