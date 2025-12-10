@@ -93,3 +93,11 @@ The `planner` subpackage is responsible for:
   python -m coverage run -m unittest discover -s tests -t .
   python -m coverage report
   ```
+
+### Handy commands
+| Command | Purpose |
+| --- | --- |
+| `$env:PYTHONPATH="src\project"` | Ensure imports resolve for `core/...` |
+| `python -m unittest -v tests.test_planner tests.test_planner_helpers` | Planner-only tests |
+| `python -m coverage run -m unittest discover -s tests -t .` | Full suite with coverage |
+| `python -m coverage report` | Coverage summary |
