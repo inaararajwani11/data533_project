@@ -1,0 +1,6 @@
+Before we start, we'll review previous tasks and optionally remove finished ones.
+
+--- Focus sessions ---
+- revision (task): 20 min, distractions=2, rating=4
+- exercise (habit): 20 min, distractions=0, rating=5
+- Strategy review (custom): 35 min, distractions=1, rating=4

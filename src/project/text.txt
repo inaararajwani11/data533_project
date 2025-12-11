@@ -1,0 +1,10 @@
+python src/project/run_demo.py
+
+python src/project/run_demo.py --auto
+
+python src/project/run_demo.py --fast
+
+python src/project/run_demo.py --days N
+
+python src/project/run_demo.py --export file.txt
+
