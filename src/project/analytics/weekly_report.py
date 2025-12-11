@@ -10,8 +10,9 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from core.focus_session import FocusSession
-from core.habit import Habit
+from project.core.focus_session import FocusSession
+from project.core.habit import Habit
+from project.analytics.exceptions import ReportExportError
 
 
 def filter_sessions_for_week(
@@ -23,7 +24,10 @@ def filter_sessions_for_week(
 
     result: List[FocusSession] = []
     for s in sessions:
-        start_day = s.start_time.date()
+        try:
+            start_day = s.start_time.date()
+        except Exception:
+            continue
         if week_start <= start_day < week_end_exclusive:
             result.append(s)
     return result
@@ -39,13 +43,29 @@ def _habit_completion_rate_for_week(
 
     week_end_inclusive = week_start + timedelta(days=6)
     completed = 0
+    considered = 0
 
     for h in habits:
-        last = h.last_completed
-        if last is not None and week_start <= last <= week_end_inclusive:
-            completed += 1
+        try:
+            last = h.last_completed
+        except Exception:
+            continue
 
-    return completed / len(habits)
+        # None or invalid dates are treated as incomplete but counted
+        if last is None:
+            considered += 1
+            continue
+
+        try:
+            in_range = week_start <= last <= week_end_inclusive
+        except Exception:
+            considered += 1
+            continue
+
+        considered += 1
+        if in_range:
+            completed += 1
+    return completed / considered if considered else 0.0
 
 
 def compute_weekly_summary(
@@ -60,10 +80,17 @@ def compute_weekly_summary(
     total_distractions = 0
 
     for s in week_sessions:
-        duration = s.duration_minutes()
+        try:
+            duration = s.duration_minutes()
+            distractions = int(getattr(s, "distractions", 0))
+        except (AttributeError, TypeError, ValueError):
+            continue
+        except Exception:
+            continue
+
         if duration is not None:
             total_focus_minutes += duration
-        total_distractions += s.distractions
+        total_distractions += distractions
 
     num_sessions = len(week_sessions)
     if num_sessions > 0:
@@ -74,12 +101,15 @@ def compute_weekly_summary(
     habit_completion_rate = _habit_completion_rate_for_week(habits, week_start)
 
     # Top habits by streak (simple heuristic)
-    sorted_habits = sorted(
-        habits,
-        key=lambda h: getattr(h, "streak", 0),
-        reverse=True,
-    )
-    top_habits = [h.name for h in sorted_habits[:3]]
+    try:
+        sorted_habits = sorted(
+            habits,
+            key=lambda h: getattr(h, "streak", 0),
+            reverse=True,
+        )
+    except Exception:
+        sorted_habits = []
+    top_habits = [getattr(h, "name", "Habit") for h in sorted_habits[:3]]
 
     summary: Dict[str, Any] = {
         "week_start": week_start,
@@ -126,9 +156,12 @@ def export_weekly_report_markdown(
     filename: str,
 ) -> None:
     text = format_weekly_report_text(summary)
-    with open(filename, "w", encoding="utf-8") as f:
-        # Simple markdown wrapper
-        f.write("# Weekly Focus Report\n\n")
-        f.write("```\n")
-        f.write(text)
-        f.write("\n```\n")
+    try:
+        with open(filename, "w", encoding="utf-8") as f:
+            # Simple markdown wrapper
+            f.write("# Weekly Focus Report\n\n")
+            f.write("```\n")
+            f.write(text)
+            f.write("\n```\n")
+    except Exception as exc:
+        raise ReportExportError(f"Failed to export weekly report to {filename}") from exc

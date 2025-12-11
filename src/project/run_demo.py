@@ -243,18 +243,10 @@ def prompt_tasks_from_user() -> list[Task]:
         category = prompt_category()
         difficulty = prompt_int("Difficulty 1-5 (default 3): ", 3, minimum=1)
         priority = prompt_int("Priority (default 1): ", 1, minimum=1)
-        completed = prompt_yes_no("Completed?", default=False)
         pomodoro = False
         planned_distractions = None
         if category == "study":
-            pomodoro = prompt_yes_no("Use Pomodoro (25/5, zero planned distractions)?", default=False)
-            planned_distractions = 0 if pomodoro else prompt_int(
-                "How many distractions occurred? (default 0): ", 0, minimum=0
-            )
-        else:
-            planned_distractions = prompt_int(
-                "How many distractions occurred? (default 0): ", 0, minimum=0
-            )
+            pomodoro = prompt_yes_no("Use Pomodoro (25/5)?", default=False)
 
         tasks.append(
             Task(
@@ -263,13 +255,24 @@ def prompt_tasks_from_user() -> list[Task]:
                 category=category,
                 difficulty=difficulty,
                 priority=priority,
-                completed=completed,
                 pomodoro=pomodoro,
                 planned_distractions=planned_distractions,
                 notes="pomodoro" if pomodoro else "",
             )
         )
         print("Added task.\n")
+    return tasks
+
+
+def enforce_pomodoro_study_only(tasks: list[Task]) -> list[Task]:
+    """
+    Ensure Pomodoro is only applied to study-category tasks.
+    Non-study tasks get pomodoro turned off but keep their distractions/notes.
+    """
+    for t in tasks:
+        if getattr(t, "category", None) != "study":
+            t.pomodoro = False
+            # Leave planned_distractions as-is; user may still track them.
     return tasks
 
 
@@ -542,6 +545,7 @@ def main():
                 Task("Stretch break", 10, category="recovery", difficulty=1),
                 Task("Review research notes", 45, category="study", difficulty=3),
             ]
+    tasks = enforce_pomodoro_study_only(tasks)
 
     # Always offer review unless fast/auto
     tasks, removal_log = review_existing_tasks(tasks, log, auto_skip=(args.auto or args.fast), quiet=args.quiet)
@@ -586,10 +590,11 @@ def main():
     custom.rate_focus(4)
     sessions.append(custom)
 
-    # Create additional days to enrich analytics for demo.
-    yesterday = [shift_session(s, days=1) for s in sessions]
-    two_days_ago = [shift_session(s, days=2) for s in sessions]
-    combined_sessions = sessions + yesterday + two_days_ago
+    # Optionally create additional days to enrich analytics for demo.
+    combined_sessions = list(sessions)
+    if args.days > 1:
+        for offset in range(1, args.days):
+            combined_sessions.extend(shift_session(s, days=offset) for s in sessions)
 
     session_lines: List[str] = []
     for s in combined_sessions:

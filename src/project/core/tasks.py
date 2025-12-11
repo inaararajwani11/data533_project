@@ -27,27 +27,30 @@ class Task:
         # Normalize numeric fields and keep them in sensible bounds.
         try:
             self.duration = max(0, int(self.duration))
-        except (TypeError, ValueError):
+        except Exception:
             self.duration = 0
 
         try:
             diff = int(self.difficulty)
-        except (TypeError, ValueError):
+        except Exception:
             diff = 3
         self.difficulty = max(1, min(5, diff))
 
         try:
             self.priority = int(self.priority)
-        except (TypeError, ValueError):
+        except Exception:
             self.priority = 1
 
-        self.pomodoro = bool(self.pomodoro)
+        try:
+            self.pomodoro = bool(self.pomodoro)
+        except Exception:
+            self.pomodoro = False
 
         # planned_distractions may be None or an int >= 0
         if self.planned_distractions is not None:
             try:
                 self.planned_distractions = max(0, int(self.planned_distractions))
-            except (TypeError, ValueError):
+            except Exception:
                 self.planned_distractions = None
 
     def mark_complete(self) -> None:
@@ -79,7 +82,11 @@ class TaskManager:
     def remove_task(self, name: str) -> bool:
         """Remove first task matching the given name."""
         for idx, task in enumerate(self.tasks):
-            if task.name == name:
+            try:
+                match = task.name == name
+            except Exception:
+                match = False
+            if match:
                 del self.tasks[idx]
                 return True
         return False

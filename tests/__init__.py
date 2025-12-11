@@ -1,4 +1,4 @@
-# Marks test directory as a package for unittest imports.
+"""Test package initializer: ensure repository paths are on sys.path."""
 from __future__ import annotations
 
 import sys

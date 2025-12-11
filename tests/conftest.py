@@ -4,8 +4,11 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-# Add repository root to sys.path so `import core` works even when tests
-# are executed with working directory set to test/.
+# Add repository src and package path to sys.path so `import project.core` works regardless of CWD.
 ROOT = Path(__file__).resolve().parents[1]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
+SRC = ROOT / "src"
+PROJECT = SRC / "project"
+
+for path in (PROJECT, SRC, ROOT):
+    if str(path) not in sys.path:
+        sys.path.insert(0, str(path))

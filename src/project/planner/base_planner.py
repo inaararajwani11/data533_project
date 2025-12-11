@@ -7,15 +7,14 @@ from datetime import datetime
 from typing import List, Sequence
 from abc import ABC, abstractmethod
 
-from ..core.task import Task
+try:
+    from core.task import Task
+except ImportError:  # Allow use when planner is imported as src.project.planner.*
+    from ..core.task import Task
 from .priority_strategy import PriorityStrategy, DeadlinePriority, EnergyAwarePriority
 from .schedulers import Scheduler, SequentialScheduler
 from .exceptions import PlannerConfigurationError
 
-
-# -------------------------------------------------------------------
-# Data structure for planned time blocks
-# -------------------------------------------------------------------
 
 
 @dataclass

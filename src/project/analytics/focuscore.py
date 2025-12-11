@@ -9,11 +9,11 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from core.focus_session import FocusSession
-from core.habit import Habit
+from project.core.focus_session import FocusSession
+from project.core.habit import Habit
 
-from analytics.weekly_report import compute_weekly_summary
-from analytics.distraction import distraction_rate_per_hour
+from project.analytics.weekly_report import compute_weekly_summary
+from project.analytics.distraction import distraction_rate_per_hour
 
 
 def compute_focus_score(

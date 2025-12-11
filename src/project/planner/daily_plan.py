@@ -11,7 +11,10 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from ..core.task import Task
+try:
+    from core.task import Task
+except ImportError:  # Allow use when planner is imported as src.project.planner.*
+    from ..core.task import Task
 from .base_planner import (
     Planner,
     StudyPlanner,
