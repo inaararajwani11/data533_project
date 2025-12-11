@@ -2,9 +2,16 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
-from typing import List, Sequence
+from typing import TYPE_CHECKING, List, Sequence
 
-from ..core.task import Task
+try:
+    from core.task import Task
+except ImportError:  # Allow use when planner is imported as src.project.planner.*
+    from ..core.task import Task
+
+# Type-checking import only to avoid runtime circular dependency.
+if TYPE_CHECKING:
+    from .base_planner import PlannedBlock
 
 # NOTE: We import PlannedBlock lazily inside methods to avoid circular imports
 # with base_planner.py (which also imports Scheduler).
@@ -98,9 +105,9 @@ class PomodoroScheduler(Scheduler):
             while remaining_minutes > 0:
                 block_end = current_start + work_delta
                 if block_end > day_end:
-                    return blocks  # no more space
+                    return blocks 
 
-                # Create a work block
+                # Creating a work block
                 blocks.append(
                     PlannedBlock(task=task, start=current_start, end=block_end)
                 )
@@ -108,13 +115,11 @@ class PomodoroScheduler(Scheduler):
                 remaining_minutes -= self.work_minutes
                 current_start = block_end
 
-                # Add break after each pomodoro if there's still task time left
+               
                 if remaining_minutes > 0:
                     break_end = current_start + break_delta
                     if break_end > day_end:
                         return blocks
-                    # Breaks are not tied to a task; you could also represent them
-                    # with a special "break" Task if you want.
                     current_start = break_end
 
         return blocks

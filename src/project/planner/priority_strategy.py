@@ -6,7 +6,10 @@ from abc import ABC, abstractmethod
 from datetime import date
 from typing import Protocol
 
-from ..core.task import Task
+try:
+    from core.task import Task
+except ImportError:  # Allow use when planner is imported as src.project.planner.*
+    from ..core.task import Task
 
 
 class SupportsDeadline(Protocol):
