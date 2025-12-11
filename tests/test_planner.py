@@ -1,16 +1,16 @@
 import unittest
 from datetime import datetime, timedelta
 
-from src.project.core.task import Task
-from src.project.planner.base_planner import (
+from project.core.task import Task
+from project.planner.base_planner import (
     BalancedPlanner,
     EnergyPlanner,
     PlannedBlock,
     StudyPlanner,
 )
-from src.project.planner.daily_plan import generate_daily_plan, get_planner
-from src.project.planner.schedulers import SequentialScheduler
-from src.project.planner.exceptions import (
+from project.planner.daily_plan import generate_daily_plan, get_planner
+from project.planner.schedulers import SequentialScheduler
+from project.planner.exceptions import (
     PlannerConfigurationError,
     SchedulingWindowError,
 )

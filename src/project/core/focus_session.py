@@ -22,7 +22,7 @@ from typing import Optional, List, Dict, Any
 
 from .tasks import Task
 from .habit import Habit
-
+from .exceptions import InvalidSessionError
 
 
 class FocusSession:
@@ -77,6 +77,24 @@ class FocusSession:
         self.focus_rating: Optional[int] = None
         self.notes: List[str] = []
 
+    def start_session(self, expected_duration_minutes: Optional[int] = None) -> "FocusSession":
+        """
+        Reset or start a session explicitly.
+        Raises InvalidSessionError if an expected duration is provided and is <= 0,
+        or if datetime operations fail.
+        """
+        try:
+            if expected_duration_minutes is not None:
+                if int(expected_duration_minutes) <= 0:
+                    raise InvalidSessionError("Session duration must be positive.")
+            self.start_time = datetime.now()
+            self.end_time = None
+            return self
+        except InvalidSessionError:
+            raise
+        except Exception as exc:
+            raise InvalidSessionError("Failed to start session") from exc
+
     # -------------------- Methods (from slide) --------------------
 
     def end_session(self, checkin_habit: Optional[bool] = None) -> None:
@@ -87,16 +105,19 @@ class FocusSession:
         auto_checkin_habit is True), mark the habit as completed today.
         """
         if self.end_time is not None:
-            return  # already ended
+            raise InvalidSessionError("Session already ended.")
 
-        self.end_time = datetime.now()
-
-        should_checkin = (
-            self.auto_checkin_habit if checkin_habit is None else checkin_habit
-        )
-
-        if should_checkin and self.habit is not None:
-            self.habit.complete_today()
+        try:
+            self.end_time = datetime.now()
+            should_checkin = (
+                self.auto_checkin_habit if checkin_habit is None else checkin_habit
+            )
+            if should_checkin and self.habit is not None:
+                self.habit.complete_today()
+        except InvalidSessionError:
+            raise
+        except Exception as exc:
+            raise InvalidSessionError("Failed to end session") from exc
 
     def record_distraction(self) -> None:
         """Increment the distraction counter by one."""
@@ -123,8 +144,11 @@ class FocusSession:
         """
         if self.end_time is None:
             return None
-        delta = self.end_time - self.start_time
-        return int(delta.total_seconds() // 60)
+        try:
+            delta = self.end_time - self.start_time
+            return int(delta.total_seconds() // 60)
+        except Exception as exc:
+            raise InvalidSessionError("Failed to compute session duration") from exc
 
     def summary(self) -> Dict[str, Any]:
         """

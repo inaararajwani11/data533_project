@@ -1,5 +1,14 @@
-core/tasks.py: Task dataclass (fields: name, duration, category, deadline, difficulty 1–5, priority, must_do_today, notes, pomodoro, planned_distractions, completed) with __post_init__ normalization, mark_complete(), summary(). TaskManager stores tasks; add_task(), list_tasks(), remove_task(name), next_task(). No inheritance.
-core/task.py: Re-exports Task and TaskManager for convenient imports.
-core/habit.py: Habit (name, frequency, streak, last_completed) with complete_today() (updates streak), reset_streak(), is_due(), __repr__. Helper functions: add_habit_from_input(), show_habit_menu(), choose_habit(). HabitManager holds habits; add_habit(), add_habit_from_input(), list_habits(), checkin() to mark one done. Composition only; no inheritance.
-core/focus_session.py: FocusSession for a single timed block tied to a Task, Habit, or custom label; tracks start/end, distractions, notes, focus rating (1–5). Methods: end_session(checkin_habit=None) (optionally calls Habit.complete_today()), record_distraction(), add_note(), rate_focus(), duration_minutes(), summary(), __repr__. Factory helpers: start_task_session(task), start_habit_session(habit, auto_checkin=True), start_custom_session(label). No inheritance—uses composition with Task/Habit.
-core/__init__.py: Package marker (empty).
+Core module overview and error handling
+- `core/tasks.py`: Task dataclass with normalization; tolerates bad inputs (duration/priority/difficulty default safely) and TaskManager operations handle unexpected task names without crashing. Re-exported via `core/task.py`.
+- `core/habit.py`: Habit model with validation/clamping for streak/frequency and safe handling of invalid `last_completed`; HabitManager and CLI helpers catch input errors; `HabitError` raised for unrecoverable date failures.
+- `core/focus_session.py`: FocusSession timer for task/habit/custom labels; explicit `start_session` validation and guarded `end_session`/`duration_minutes` raise `InvalidSessionError` for invalid states.
+- `core/exceptions.py`: Custom exceptions `InvalidSessionError` and `HabitError`.
+- `core/__init__.py`: Package marker.
+
+Testing (run from repo root)
+```bash
+$env:PYTHONPATH="."
+python -m unittest -v test.test_core
+python -m coverage run -m unittest discover -s test -t .
+python -m coverage report
+```

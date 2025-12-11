@@ -2,6 +2,8 @@
 
 
 class InvalidSessionError(Exception):
-    """Raised when a focus session is started with invalid parameters."""
+    """Raised when a focus session is started with invalid parameters or state."""
 
-    pass
+
+class HabitError(Exception):
+    """Raised when habit data cannot be processed safely."""

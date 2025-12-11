@@ -116,6 +116,28 @@ Create JSON files in repo root.
 pytest
 ```
 
+### Analytics testing & coverage
+Analytics functions now skip malformed session/habit data and `weekly_report.export_weekly_report_markdown` raises `ReportExportError` on write failures.
+Run from repo root:
+```bash
+$env:PYTHONPATH="."
+python -m unittest -v test.test_analytics
+python -m coverage run -m unittest discover -s test -t .
+python -m coverage report
+```
+
+### Core testing & exceptions
+Core now guards invalid sessions/habits/tasks and raises custom exceptions where needed:
+- `InvalidSessionError` for invalid focus session states.
+- `HabitError` for unrecoverable habit date issues.
+Run from repo root:
+```bash
+$env:PYTHONPATH="."
+python -m unittest -v test.test_core
+python -m coverage run -m unittest discover -s test -t .
+python -m coverage report
+```
+
 ### Notes / extensibility
 - Persistence is JSON + prompts (educational focus). Swap in a database or API as needed.
 - Pomodoro flag currently just sets planned distractions to zero and tags the session; adjust duration/scheduling via `PomodoroScheduler` if desired.

@@ -1,15 +1,10 @@
 import unittest
 from datetime import date, datetime, timedelta
 from unittest.mock import Mock, patch
-import sys
-import os
 
-# Add the parent directory to the path to import the modules
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-from core.focus_session import FocusSession
-from core.habit import Habit
-from analytics.focuscore import (
+from project.core.focus_session import FocusSession
+from project.core.habit import Habit
+from project.analytics.focuscore import (
     compute_focus_score,
     focus_grade,
     compute_weekly_focus_score,
@@ -168,8 +163,8 @@ class TestFocusCore(unittest.TestCase):
         self.assertEqual(grade11, "Needs work", "Score < 40 should be Needs work")
         self.assertIsInstance(grade9, str, "Grade should be a string")
 
-    @patch("analytics.focuscore.compute_weekly_summary")
-    @patch("analytics.focuscore.distraction_rate_per_hour")
+    @patch("project.analytics.focuscore.compute_weekly_summary")
+    @patch("project.analytics.focuscore.distraction_rate_per_hour")
     def test_compute_weekly_focus_score_integration(self, mock_distraction_rate, mock_weekly_summary):
         # Setup mock returns
         mock_weekly_summary.return_value = {
@@ -201,7 +196,7 @@ class TestFocusCore(unittest.TestCase):
         self.assertGreater(score, 0.0, "Score with reasonable inputs should be positive")
 
     def test_compute_weekly_focus_with_grade_integration(self):
-        with patch("analytics.focuscore.compute_weekly_focus_score") as mock_score:
+        with patch("project.analytics.focuscore.compute_weekly_focus_score") as mock_score:
             # Setup mock return
             mock_score.return_value = 75.5
 

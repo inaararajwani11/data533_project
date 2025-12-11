@@ -1,5 +1,6 @@
 from typing import Optional
 from datetime import date, datetime, timedelta
+from .exceptions import HabitError
 
 class Habit:
     """
@@ -10,9 +11,18 @@ class Habit:
     def __init__(self, name: str, frequency: str = "daily",
                  streak: int = 0, last_completed: Optional[date] = None) -> None:
         self.name = name
-        self.frequency = frequency
-        self.streak = streak
-        self.last_completed = last_completed
+        try:
+            self.frequency = str(frequency).lower() if frequency else "daily"
+        except Exception:
+            self.frequency = "daily"
+
+        try:
+            self.streak = max(0, int(streak))
+        except Exception:
+            self.streak = 0
+
+        # Only store valid date objects; otherwise default to None.
+        self.last_completed = last_completed if isinstance(last_completed, date) else None
 
     def __repr__(self) -> str:
         return (
@@ -22,16 +32,22 @@ class Habit:
 
     def complete_today(self) -> None:
         """Mark the habit as completed today, updating streak."""
-        today = date.today()
+        try:
+            today = date.today()
+        except Exception as exc:
+            raise HabitError("Failed to compute today's date") from exc
 
         if self.last_completed == today:
             print("Habit already completed today.")
             return
 
-        if self.last_completed == today - timedelta(days=1):
-            self.streak += 1
-        else:
-            self.streak = 1
+        try:
+            if self.last_completed == today - timedelta(days=1):
+                self.streak += 1
+            else:
+                self.streak = 1
+        except Exception as exc:
+            raise HabitError("Failed to update streak") from exc
 
         self.last_completed = today
 
@@ -57,14 +73,18 @@ def add_habit_from_input(default_name: str = "Sample Habit",
         name = input(f"Habit name (default: {default_name}): ").strip()
         if not name:
             name = default_name
-    except OSError:
+    except (OSError, TypeError, ValueError):
+        name = default_name
+    except Exception:
         name = default_name
 
     try:
         freq = input(f"Frequency (default: {default_frq}): ").strip().lower()
         if not freq:
             freq = default_frq
-    except OSError:
+    except (OSError, TypeError, ValueError):
+        freq = default_frq
+    except Exception:
         freq = default_frq
 
     return Habit(name=name, frequency=freq)
@@ -94,8 +114,11 @@ def choose_habit(habits: list[Habit]) -> Optional[Habit]:
     while True:
         try:
             choice = input("Select a habit by number (or 'q' to quit): ").strip()
-        except OSError:
+        except (OSError, TypeError, ValueError):
             print("Input unavailable. Returning None.")
+            return None
+        except Exception:
+            print("Unexpected input error. Returning None.")
             return None
 
         if choice.lower() == "q":
@@ -151,7 +174,7 @@ class HabitManager:
         habit.complete_today()
         print(f"Checked in: {habit.name}. New streak: {habit.streak}")
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     # Simple demo / manual test for the habit system
     manager = HabitManager()
 

@@ -1,14 +1,14 @@
 import unittest
 from datetime import datetime, timedelta
 
-from src.project.core.task import Task
-from src.project.planner.base_planner import BalancedPlanner, PlannedBlock
-from src.project.planner.daily_plan import (
+from project.core.task import Task
+from project.planner.base_planner import BalancedPlanner, PlannedBlock
+from project.planner.daily_plan import (
     generate_daily_plan,
     _normalize_energy_level,
     _parse_time,
 )
-from src.project.planner.exceptions import PlannerConfigurationError
+from project.planner.exceptions import PlannerConfigurationError
 
 
 class PlannerHelperTests(unittest.TestCase):

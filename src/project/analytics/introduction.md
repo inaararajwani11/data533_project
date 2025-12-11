@@ -1,3 +1,15 @@
-The Analytics sub‑package provides tools that transform raw productivity data into meaningful insights. It analyzes focus sessions, habits, and distraction patterns to help users understand their performance trends over time. By computing weekly summaries, identifying distraction behaviors, and generating a unified focus score, this sub‑package acts as the “reporting engine” of the project.
+The Analytics subpackage transforms focus sessions and habits into weekly insights. It computes distraction rates, habit completion, and an overall focus score, then renders a markdown report for sharing.
 
-Its three modules—weekly_report.py, distraction.py, and focuscore.py—work together to measure total focus time, habit consistency, productivity quality, and distraction rates. These metrics are then translated into readable reports and simple evaluations that support user reflection and improvement.
+Modules and error handling
+- `distraction.py`: totals and per-task distraction rates; skips malformed session data instead of crashing.
+- `weekly_report.py`: filters sessions for a week, calculates habit completion, and exports markdown; skips bad entries and raises `ReportExportError` on export failures.
+- `focuscore.py`: combines distraction and habit metrics into a weekly focus score and grade.
+- `exceptions.py`: defines `ReportExportError` used by report export.
+
+Testing and coverage (run from repo root)
+```bash
+$env:PYTHONPATH="."
+python -m unittest -v test.test_analytics
+python -m coverage run -m unittest discover -s test -t .
+python -m coverage report
+```

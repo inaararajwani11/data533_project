@@ -9,11 +9,20 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from core.focus_session import FocusSession
+from project.core.focus_session import FocusSession
 
 
 def total_distractions(sessions: List[FocusSession]) -> int:
-    return sum(s.distractions for s in sessions)
+    total = 0
+    for s in sessions:
+        try:
+            total += int(getattr(s, "distractions", 0))
+        except (TypeError, AttributeError, ValueError):
+            # Skip sessions with unusable distraction data.
+            continue
+        except Exception:
+            continue
+    return total
 
 
 def distraction_rate_per_hour(
@@ -23,10 +32,17 @@ def distraction_rate_per_hour(
     total = 0
 
     for s in sessions:
-        duration = s.duration_minutes()
+        try:
+            duration = s.duration_minutes()
+            distractions = int(getattr(s, "distractions", 0))
+        except (AttributeError, TypeError, ValueError):
+            continue
+        except Exception:
+            continue
+
         if duration is not None and duration > 0:
             total_minutes += duration
-            total += s.distractions
+            total += distractions
 
     if total_minutes == 0:
         return None
@@ -42,8 +58,14 @@ def distractions_by_day(
     result: Dict[date, int] = {}
 
     for s in sessions:
-        day = s.start_time.date()
-        result[day] = result.get(day, 0) + s.distractions
+        try:
+            day = s.start_time.date()
+            distractions = int(getattr(s, "distractions", 0))
+        except (AttributeError, TypeError, ValueError):
+            continue
+        except Exception:
+            continue
+        result[day] = result.get(day, 0) + distractions
 
     return result
 
@@ -56,21 +78,27 @@ def distraction_rate_by_task(
     total_distractions_by_label: Dict[str, int] = {}
 
     for s in sessions:
-        # Derive a label
-        if getattr(s, "task", None) is not None:
-            label = getattr(s.task, "name", "Task")
-        elif getattr(s, "habit", None) is not None:
-            label = f"Habit: {getattr(s.habit, 'name', 'Habit')}"
-        else:
-            label = s.label
+        try:
+            if getattr(s, "task", None) is not None:
+                label = getattr(s.task, "name", "Task")
+            elif getattr(s, "habit", None) is not None:
+                label = f"Habit: {getattr(s.habit, 'name', 'Habit')}"
+            else:
+                label = getattr(s, "label", "Session")
 
-        duration = s.duration_minutes()
+            duration = s.duration_minutes()
+            distractions = int(getattr(s, "distractions", 0))
+        except (AttributeError, TypeError, ValueError):
+            continue
+        except Exception:
+            continue
+
         if duration is None or duration <= 0:
             continue
 
         total_minutes_by_label[label] = total_minutes_by_label.get(label, 0) + duration
         total_distractions_by_label[label] = (
-            total_distractions_by_label.get(label, 0) + s.distractions
+            total_distractions_by_label.get(label, 0) + distractions
         )
 
     rates: Dict[str, float] = {}
