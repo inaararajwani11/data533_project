@@ -1,3 +1,5 @@
+modes used
+
 python src/project/run_demo.py
 
 python src/project/run_demo.py --auto
