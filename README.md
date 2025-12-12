@@ -53,7 +53,7 @@ python -m coverage report
  This project includes a Jupyter Notebook that demonstrates how to install and run the published package after uploading it to TestPyPI. 
  
  ### 📄 Demonstration File 
- Please `test_run_focuspro.ipynb` refer to the following notebook to see a complete execution example
+ Please  refer to the following notebook `test_run_focuspro.ipynb` to see a complete execution example
 ```
 - Planner only: `python -m unittest -v tests.test_planner tests.test_planner_helpers`
 - Core/analytics: `python -m unittest -v tests.test_core tests.test_focuscore`
