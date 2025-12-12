@@ -28,9 +28,6 @@ Productivity toolkit with three subpackages (`core`, `planner`, `analytics`) plu
 
 5)python src/project/run_demo.py --export file.txt
 
-
-
-
 ### Quick start (PowerShell, repo root)
 ```bash
 $env:PYTHONPATH="src\project"
